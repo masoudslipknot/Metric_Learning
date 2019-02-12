@@ -3,6 +3,7 @@ import tensorly as tl
 import math
 from numpy import linalg as LA
 import tensorflow as tf
+from tensorly import tenalg as ten
 
 def g(z):
     result = 1/(3*math.log(1+math.exp(-3*z),10))
@@ -40,11 +41,12 @@ for v in range(0,8):
 
 
 
-U1 = tl.tensor(np.arange(36).reshape((9, 2, 2)))
-U2 = tl.tensor(np.arange(36).reshape((9, 2, 2)))
-U3 = tl.tensor(np.arange(36).reshape((9, 2, 2)))
+U1 = tl.tensor(np.arange(27).reshape((3, 3, 3)))
+U2 = tl.tensor(np.arange(27).reshape((3, 3, 3)))
+U3 = tl.tensor(np.arange(27).reshape((3, 3, 3)))
 
 ALLU = [U1, U2, U3]
+
 
 w = 0                                          # w is covarianse of tensor
 sum2 = 0
@@ -57,18 +59,27 @@ Nprim = (nm*(nm-1))/2
 
 ALLDELTA = [delta1, delta2, delta3]
 
+def nd_id(n, d):
+    out = np.zeros( (n,) * d )
+    out[ [np.arange(n)] * d ] = 1
+    return out
 
 
+ER = nd_id(3,3)
 
-#ER = tf.eye  #identity tesnor that i should find
+
+#print("fdghkjdfhgkdj")
+#identity tesnor that i should find
 #print(ER)
 
-ans = tl.mode_dot(ER, ALLU[0], 1)
+ans = ten.inner(ALLU[0],ER , 1)
+print(ans)
+print("jksfkjsdf")
 for i in range(0,P):
     for j in range(1,M):
-        ans = tl.mode_dot(ans, ALLU[j], j)
-    b = w^P - ans
-    sum2 = sum2 + LA.norm(b,'fro')^2
+        ans = ten.inner(ans, ALLU[j], j)
+    b = w**P - ans
+    sum2 = sum2 + LA.norm(b,'fro')**2
 
 sum3 = 0
 Gamma = [2, 1, 3]
@@ -79,3 +90,6 @@ for m in range(1,M):
     for k in range(1,Nprim):
         curdel = ALLDELTA[m]
         sum1 = sum1 + g(Ymk[0](1-np.matmul(np.matmul(np.matmul(curdel[k].transpose(),ALLU[m])),ALLU[m].transpose()),curdel[k]))
+
+
+sum = (1/Nprim)* sum1 + sum2 + sum3
